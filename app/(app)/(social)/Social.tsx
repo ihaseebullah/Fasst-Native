@@ -283,7 +283,7 @@ const SocialScreen = () => {
           style={styles.floatingButton}
           onPress={() => setModalVisible(true)}
         >
-          <Ionicons name="add" size={24} color={Colors.Secondary} />
+          <Ionicons name="plus-circle-outline" size={24} color={Colors.Secondary} />
         </TouchableOpacity>
 
         {/* New Post Modal */}
@@ -302,7 +302,7 @@ const SocialScreen = () => {
                   setModalVisible(false);
                 }}
               >
-                <Ionicons name="close" size={24} color={Colors.Secondary} />
+                <Ionicons name="close-circle-outline" size={24} color={Colors.Secondary} />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>New Post</Text>
               <TouchableOpacity onPress={handlePost} disabled={!selectedImage}>
@@ -419,7 +419,7 @@ const SocialScreen = () => {
               <TouchableOpacity
                 onPress={() => setEditProfileModalVisible(false)}
               >
-                <Ionicons name="close" size={24} color={Colors.Secondary} />
+                <Ionicons name="close-circle-outline" size={24} color={Colors.Secondary} />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <TouchableOpacity
@@ -551,7 +551,7 @@ const SocialScreen = () => {
                 onPress={() => handleImagePicker("gallery")}
               >
                 <Ionicons
-                  name="image-outline"
+                  name="file-image-outline"
                   size={24}
                   color={Colors.Secondary}
                   style={styles.iconStyle}

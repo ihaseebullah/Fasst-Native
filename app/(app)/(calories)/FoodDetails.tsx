@@ -115,13 +115,13 @@ const FoodDetails = ({route}) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Nutrient Information</Text>
           <Text style={styles.item}>
-            <Ionicons name="flame-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="fire" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Calories:</Text>{' '}
             {foodData.Data.Kilocalories} kcal
           </Text>
           <Text style={styles.item}>
             <Ionicons
-              name="restaurant-outline"
+              name="pizza"
               size={16}
               color={Colors.Secondary}
             />{' '}
@@ -130,7 +130,7 @@ const FoodDetails = ({route}) => {
           </Text>
           <Text style={styles.item}>
             <Ionicons
-              name="fitness-outline"
+              name="source-commit-start-next-local"
               size={16}
               color={Colors.Secondary}
             />{' '}
@@ -152,13 +152,13 @@ const FoodDetails = ({route}) => {
             {foodData.Data.Fat['Monosaturated Fat']} g
           </Text>
           <Text style={styles.item}>
-            <Ionicons name="leaf-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="leaf" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Polysaturated Fat:</Text>{' '}
             {foodData.Data.Fat['Polysaturated Fat']} g
           </Text>
           <Text style={styles.item}>
             <Ionicons
-              name="medkit-outline"
+              name="hospital"
               size={16}
               color={Colors.Secondary}
             />{' '}
@@ -171,17 +171,17 @@ const FoodDetails = ({route}) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Vitamins</Text>
           <Text style={styles.item}>
-            <Ionicons name="sunny-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="shield-sun-outline" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Vitamin A:</Text>{' '}
             {foodData.Data.Vitamins['Vitamin A - IU']} IU
           </Text>
           <Text style={styles.item}>
-            <Ionicons name="leaf-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="leaf" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Vitamin C:</Text>{' '}
             {foodData.Data.Vitamins['Vitamin C']} mg
           </Text>
           <Text style={styles.item}>
-            <Ionicons name="bulb-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="shield-sun" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Vitamin E:</Text>{' '}
             {foodData.Data.Vitamins['Vitamin E']} mg
           </Text>
@@ -207,7 +207,7 @@ const FoodDetails = ({route}) => {
           </Text>
           <Text style={styles.item}>
             <Ionicons
-              name="medkit-outline"
+              name="iron"
               size={16}
               color={Colors.Secondary}
             />{' '}
@@ -230,7 +230,7 @@ const FoodDetails = ({route}) => {
             {foodData.Data['Major Minerals'].Sodium} mg
           </Text>
           <Text style={styles.item}>
-            <Ionicons name="leaf-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="midi-port" size={16} color={Colors.Secondary} />{' '}
             <Text style={styles.label}>Zinc:</Text>{' '}
             {foodData.Data['Major Minerals'].Zinc} mg
           </Text>
@@ -240,7 +240,7 @@ const FoodDetails = ({route}) => {
         <View style={[styles.section, {marginBottom: 150}]}>
           <Text style={styles.sectionTitle}>Household Weights</Text>
           <Text style={styles.item}>
-            <Ionicons name="scale-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="scale" size={16} color={Colors.Secondary} />{' '}
             {
               foodData.Data['Household Weights'][
                 '1st Household Weight Description'
@@ -249,7 +249,7 @@ const FoodDetails = ({route}) => {
             : {foodData.Data['Household Weights']['1st Household Weight']} g
           </Text>
           <Text style={styles.item}>
-            <Ionicons name="scale-outline" size={16} color={Colors.Secondary} />{' '}
+            <Ionicons name="scale" size={16} color={Colors.Secondary} />{' '}
             {
               foodData.Data['Household Weights'][
                 '2nd Household Weight Description'
@@ -264,7 +264,7 @@ const FoodDetails = ({route}) => {
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={handleConsumeFood}>
-        <Ionicons name="nutrition-outline" size={24} color={Colors.Secondary} />
+        <Ionicons name="nutrition" size={24} color={Colors.Secondary} />
         <Text style={{color: '#fff'}}> Consume</Text>
       </TouchableOpacity>
 

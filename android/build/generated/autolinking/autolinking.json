@@ -110,7 +110,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-gesture-handler\\RNGestureHandler.podspec",
-          "version": "2.19.0",
+          "version": "2.20.0",
           "configurations": [],
           "scriptPhases": []
         },
