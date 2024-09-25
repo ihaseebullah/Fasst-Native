@@ -25,7 +25,6 @@ const ColabScreen = () => {
             `${Server}/api/social/interactions/get/location/${user.SOCIAL_USER}/`
           )
           .then((res) => {
-            console.log(res.data);
             setUserLocations(res.data);
           })
           .catch((err) => console.error("Error fetching user locations:", err));

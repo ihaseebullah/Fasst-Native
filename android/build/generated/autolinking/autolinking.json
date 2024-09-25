@@ -181,6 +181,34 @@
         }
       }
     },
+    "react-native-pager-view": {
+      "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-pager-view",
+      "name": "react-native-pager-view",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-pager-view\\react-native-pager-view.podspec",
+          "version": "6.4.1",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-pager-view\\android",
+          "packageImportPath": "import com.reactnativepagerview.PagerViewPackage;",
+          "packageInstance": "new PagerViewPackage()",
+          "buildTypes": [],
+          "libraryName": "pagerview",
+          "componentDescriptors": [
+            "LEGACY_RNCViewPagerComponentDescriptor",
+            "RNCViewPagerComponentDescriptor"
+          ],
+          "cmakeListsPath": "D:/CEVEN/fasst-native/fasst/node_modules/react-native-pager-view/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-reanimated": {
       "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-reanimated",
       "name": "react-native-reanimated",

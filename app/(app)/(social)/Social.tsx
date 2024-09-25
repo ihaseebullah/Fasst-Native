@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+// @ts-nocheck
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,20 +14,18 @@ import {
   ToastAndroid,
   Switch,
   RefreshControl, // Import RefreshControl
-} from "react-native";
-import  Ionicons from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as ImagePicker from "react-native-image-picker";
-import { Cloudinary } from "@cloudinary/url-gen";
-import { upload } from "cloudinary-react-native";
-import axios from "axios";
-import { Server } from "../../../constants/Configs";
-import { UserContext } from "../../../context/UserContext";
-import { Colors } from "../../../constants/Colors";
-import { useNavigation } from "@react-navigation/native";
-import Loader from "../../../components/shared/Loader";
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as ImagePicker from 'react-native-image-picker';
+import axios from 'axios';
+import {local, Server} from '../../../constants/Configs';
+import {UserContext} from '../../../context/UserContext';
+import {Colors} from '../../../constants/Colors';
+import {useNavigation} from '@react-navigation/native';
+import Loader from '../../../components/shared/Loader';
 
 const SocialScreen = () => {
-  const { user, setSocialUser } = useContext(UserContext);
+  const {user, setSocialUser,socialUser} = useContext(UserContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
@@ -34,7 +33,7 @@ const SocialScreen = () => {
   const [userData, setUserData] = useState({});
   const [imageUpload, setImageUpload] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [caption, setCaption] = useState("");
+  const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
   const [fullScreenPost, setFullScreenPost] = useState(null);
   const [imagePickerModalVisible, setImagePickerModalVisible] = useState(false);
@@ -53,21 +52,19 @@ const SocialScreen = () => {
 
   const fetchUserData = () => {
     setLoading(true);
-    axios
-      .get(`${Server}/api/social/get-user/${user.SOCIAL_USER}`)
-      .then((res) => {
-        console.log(res.data);
-        setSocialUser(res.data);
-        setUserData(res.data);
-        setProfileVisibility(res.data.prefrences.visibility || false);
-        setLoading(false);
-      });
+    axios.get(`${Server}/api/social/get-user/${user.SOCIAL_USER}`).then(res => {
+      console.log(res.data);
+      setSocialUser(res.data);
+      setUserData(res.data);
+      setProfileVisibility(res.data.prefrences.visibility || false);
+      setLoading(false);
+    });
   };
 
   const fetchPosts = () => {
     axios
       .get(`${Server}/api/social/interactions/getPosts/${userData._id}/`)
-      .then((res) => {
+      .then(res => {
         setPosts(res.data);
         console.log(res.data);
       });
@@ -81,21 +78,9 @@ const SocialScreen = () => {
     setRefreshing(false);
   };
 
-  // Create and configure your Cloudinary instance
-  const cld = new Cloudinary({
-    cloud: {
-      cloudName: "dwe2jadmh",
-      apiKey: "174523445685639",
-      apiSecret: "fic7vt0PlcsdIteHDBU0GBQvBec",
-    },
-    url: {
-      secure: true,
-    },
-  });
-
   const handleEditProfile = async () => {
     console.log(selectedImage);
-    let url = "";
+    let url = '';
     selectedImage != null
       ? (url = await handleFileUpload(selectedImage))
       : null;
@@ -107,68 +92,69 @@ const SocialScreen = () => {
         bio: userData.bio,
         profileVisibility: profileVisibility,
       })
-      .then((res) => {
+      .then(res => {
         setUserData(res.data);
         setEditProfileModalVisible(false);
       })
-      .catch((err) => {
+      .catch(err => {
         setEditProfileModalVisible(false);
         console.error(err);
       });
   };
 
-  const handleFileUpload = (fileUri) => {
-    console.log(fileUri);
-    return new Promise((resolve, reject) => {
-      setImageUpload(true);
-      upload(cld, {
-        file: fileUri,
-        options: {
-          upload_preset: "ml_default",
-        },
-        callback: (error, result) => {
-          setImageUpload(false);
-          setSelectedImage(null);
-          if (error) {
-            setSelectedImage(null);
-            console.error("Upload error:", error);
-            reject(error);
-          } else {
-            resolve(result.secure_url);
-            setSelectedImage(null);
-          }
-        },
-      });
+  const handleFileUpload = async fileUri => {
+    const formData = new FormData();
+    formData.append('file', {
+      uri: fileUri,
+      type: 'image/jpeg',
+      name: 'photo.jpg',
     });
+    try {
+      const res = await axios.post(
+        `${local}/api/fasst/services/upload`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+      console.log(res.data);
+      setSelectedImage(res.data.url);
+      return res.data.url;
+    } catch (err) {
+      console.error(err);
+      ToastAndroid.show('Failed to upload image', ToastAndroid.LONG);
+      setSelectedImage(null);
+      return null;
+    }
   };
 
   const requestPermissions = async () => {
-    const { status: cameraStatus } =
+    const {status: cameraStatus} =
       await ImagePicker.requestCameraPermissionsAsync();
-    const { status: mediaLibraryStatus } =
+    const {status: mediaLibraryStatus} =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
-      alert("Permission to access camera and media library is required!");
+    if (cameraStatus !== 'granted' || mediaLibraryStatus !== 'granted') {
+      alert('Permission to access camera and media library is required!');
       return false;
     }
     return true;
   };
 
-  const handleImagePicker = async (option) => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
+  const handleImagePicker = async option => {
+    // const hasPermissions = await requestPermissions();
+    // if (!hasPermissions) return;
     let result;
 
-    if (option === "camera") {
-      result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    if (option === 'camera') {
+      result = await ImagePicker.launchCamera({
         allowsEditing: true,
         quality: 1,
       });
-    } else if (option === "gallery") {
-      result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    } else if (option === 'gallery') {
+      result = await ImagePicker.launchImageLibrary({
         allowsEditing: true,
         quality: 1,
       });
@@ -190,30 +176,30 @@ const SocialScreen = () => {
 
   const handlePost = async () => {
     setLoading(true);
-    const url = await handleFileUpload(selectedImage);
+    const url = await handleFileUpload(selectedImage)
     axios
       .post(`${Server}/api/social/interactions/post`, {
         socialUserId: userData._id,
         caption: caption,
         image: url,
       })
-      .then((res) => {
+      .then(res => {
         if (res.status === 201) {
           setPosts([...posts, res.data]);
-          ToastAndroid.show("Posted", ToastAndroid.SHORT);
+          ToastAndroid.show('Posted', ToastAndroid.SHORT);
           setLoading(false);
-          setCaption("");
+          setCaption('');
           setSelectedImage(null);
           setModalVisible(false);
         }
       })
-      .catch((err) => {
+      .catch(err => {
         setLoading(false);
         console.error(err);
       });
   };
 
-  const handlePostPress = (post) => {
+  const handlePostPress = post => {
     setFullScreenPost(post);
   };
 
@@ -224,12 +210,11 @@ const SocialScreen = () => {
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
+          }>
           <View style={styles.profileSection}>
             <TouchableOpacity onPress={() => setProfileModalVisible(true)}>
               <Image
-                source={{ uri: userData.profilePic }}
+                source={{uri: userData.profilePic}}
                 style={styles.profileImage}
               />
             </TouchableOpacity>
@@ -242,16 +227,16 @@ const SocialScreen = () => {
 
           <View style={styles.bioSection}>
             <Text
-              style={styles.fullName}
-            >{`${userData.firstName} ${userData.lastName}`}</Text>
+              style={
+                styles.fullName
+              }>{`${userData.firstName} ${userData.lastName}`}</Text>
             <Text style={styles.bio}>@ {userData.username}</Text>
             <Text style={styles.bio}>{userData.bio}</Text>
           </View>
 
           <TouchableOpacity
             style={styles.editProfileButton}
-            onPress={() => setEditProfileModalVisible(true)}
-          >
+            onPress={() => setEditProfileModalVisible(true)}>
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </TouchableOpacity>
 
@@ -260,16 +245,15 @@ const SocialScreen = () => {
           </View>
 
           <FlatList
-            style={{ marginBottom: 90 }}
+            style={{marginBottom: 90}}
             data={posts}
-            renderItem={({ item }) => (
+            renderItem={({item}) => (
               <TouchableOpacity
                 key={item._id}
                 style={styles.post}
-                onPress={() => handlePostPress(item)}
-              >
+                onPress={() => handlePostPress(item)}>
                 <Image
-                  source={{ uri: item.media.image }}
+                  source={{uri: item.media.image}}
                   style={styles.postImage}
                 />
               </TouchableOpacity>
@@ -281,9 +265,12 @@ const SocialScreen = () => {
 
         <TouchableOpacity
           style={styles.floatingButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Ionicons name="plus-circle-outline" size={24} color={Colors.Secondary} />
+          onPress={() => setModalVisible(true)}>
+          <Ionicons
+            name="plus-circle-outline"
+            size={24}
+            color={Colors.Secondary}
+          />
         </TouchableOpacity>
 
         {/* New Post Modal */}
@@ -291,27 +278,28 @@ const SocialScreen = () => {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
+          onRequestClose={() => setModalVisible(false)}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
                 onPress={() => {
-                  setCaption("");
+                  setCaption('');
                   setSelectedImage(null);
                   setModalVisible(false);
-                }}
-              >
-                <Ionicons name="close-circle-outline" size={24} color={Colors.Secondary} />
+                }}>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={24}
+                  color={Colors.Secondary}
+                />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>New Post</Text>
               <TouchableOpacity onPress={handlePost} disabled={!selectedImage}>
                 <Text
                   style={[
                     styles.modalShareText,
-                    !selectedImage && { color: Colors.TextSecondary },
-                  ]}
-                >
+                    !selectedImage && {color: Colors.TextSecondary},
+                  ]}>
                   Post
                 </Text>
               </TouchableOpacity>
@@ -326,14 +314,13 @@ const SocialScreen = () => {
                       ? styles.uploadArea
                       : [
                           styles.uploadArea,
-                          { justifyContent: "center", alignItems: "center" },
+                          {justifyContent: 'center', alignItems: 'center'},
                         ]
                   }
-                  onPress={handleSelectPhoto}
-                >
+                  onPress={handleSelectPhoto}>
                   {selectedImage ? (
                     <Image
-                      source={{ uri: selectedImage }}
+                      source={{uri: selectedImage}}
                       style={styles.uploadedImage}
                     />
                   ) : (
@@ -365,17 +352,15 @@ const SocialScreen = () => {
           animationType="fade"
           transparent={true}
           visible={!!fullScreenPost}
-          onRequestClose={() => setFullScreenPost(null)}
-        >
+          onRequestClose={() => setFullScreenPost(null)}>
           <TouchableOpacity
             style={styles.fullScreenModal}
             activeOpacity={1}
-            onPress={() => setFullScreenPost(null)}
-          >
+            onPress={() => setFullScreenPost(null)}>
             {fullScreenPost && (
               <>
                 <Image
-                  source={{ uri: fullScreenPost.media.image }}
+                  source={{uri: fullScreenPost.media.image}}
                   style={styles.fullScreenImage}
                 />
                 <View style={styles.fullScreenCaption}>
@@ -393,15 +378,13 @@ const SocialScreen = () => {
           animationType="fade"
           transparent={true}
           visible={profileModalVisible}
-          onRequestClose={() => setProfileModalVisible(false)}
-        >
+          onRequestClose={() => setProfileModalVisible(false)}>
           <TouchableOpacity
             style={styles.profileModalOverlay}
             activeOpacity={1}
-            onPress={() => setProfileModalVisible(false)}
-          >
+            onPress={() => setProfileModalVisible(false)}>
             <Image
-              source={{ uri: userData.profilePic }}
+              source={{uri: userData.profilePic}}
               style={styles.largeProfileImage}
             />
           </TouchableOpacity>
@@ -412,32 +395,32 @@ const SocialScreen = () => {
           animationType="slide"
           transparent={true}
           visible={editProfileModalVisible}
-          onRequestClose={() => setEditProfileModalVisible(false)}
-        >
+          onRequestClose={() => setEditProfileModalVisible(false)}>
           <View style={styles.editProfileModalContent}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
-                onPress={() => setEditProfileModalVisible(false)}
-              >
-                <Ionicons name="close-circle-outline" size={24} color={Colors.Secondary} />
+                onPress={() => setEditProfileModalVisible(false)}>
+                <Ionicons
+                  name="close-circle-outline"
+                  size={24}
+                  color={Colors.Secondary}
+                />
               </TouchableOpacity>
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <TouchableOpacity
                 disabled={imageUpload}
-                onPress={handleEditProfile}
-              >
-                {/* <Ionicons
+                onPress={handleEditProfile}>
+                 <Ionicons
                   name="checkmark"
                   size={24}
                   color={imageUpload ? Colors.CardBackground : Colors.Blue}
-                /> */}
+                /> 
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.editProfileForm}>
               <TouchableOpacity
                 style={styles.changeProfilePicture}
-                onPress={handleChangeProfilePicture}
-              >
+                onPress={handleChangeProfilePicture}>
                 {imageUpload ? (
                   <ActivityIndicator
                     color={Colors.Blue}
@@ -466,8 +449,8 @@ const SocialScreen = () => {
                 <TextInput
                   style={styles.input}
                   value={userData.username}
-                  onChangeText={(text) =>
-                    setUserData({ ...userData, username: text })
+                  onChangeText={text =>
+                    setUserData({...userData, username: text})
                   }
                   placeholderTextColor={Colors.TextSecondary}
                 />
@@ -477,8 +460,8 @@ const SocialScreen = () => {
                 <TextInput
                   style={styles.input}
                   value={userData.firstName}
-                  onChangeText={(text) =>
-                    setUserData({ ...userData, firstName: text })
+                  onChangeText={text =>
+                    setUserData({...userData, firstName: text})
                   }
                   placeholderTextColor={Colors.TextSecondary}
                 />
@@ -488,8 +471,8 @@ const SocialScreen = () => {
                 <TextInput
                   style={styles.input}
                   value={userData.lastName}
-                  onChangeText={(text) =>
-                    setUserData({ ...userData, lastName: text })
+                  onChangeText={text =>
+                    setUserData({...userData, lastName: text})
                   }
                   placeholderTextColor={Colors.TextSecondary}
                 />
@@ -499,9 +482,7 @@ const SocialScreen = () => {
                 <TextInput
                   style={[styles.input, styles.bioInput]}
                   value={userData.bio}
-                  onChangeText={(text) =>
-                    setUserData({ ...userData, bio: text })
-                  }
+                  onChangeText={text => setUserData({...userData, bio: text})}
                   multiline
                   placeholderTextColor={Colors.TextSecondary}
                 />
@@ -510,7 +491,7 @@ const SocialScreen = () => {
                 <Text style={styles.inputLabel}>Profile Visibility</Text>
                 <Switch
                   value={profileVisibility}
-                  onValueChange={(value) => setProfileVisibility(value)}
+                  onValueChange={value => setProfileVisibility(value)}
                   trackColor={{
                     false: Colors.TextSecondary,
                     true: Colors.Blue,
@@ -527,16 +508,14 @@ const SocialScreen = () => {
           animationType="slide"
           transparent={true}
           visible={imagePickerModalVisible}
-          onRequestClose={() => setImagePickerModalVisible(false)}
-        >
+          onRequestClose={() => setImagePickerModalVisible(false)}>
           <View style={styles.bottomModalContainer}>
             <View style={styles.bottomModal}>
               <Text style={styles.bottomModalTitle}>Select Image Source</Text>
               <TouchableOpacity
                 id="camera"
                 style={styles.bottomModalOption}
-                onPress={() => handleImagePicker("camera")}
-              >
+                onPress={() => handleImagePicker('camera')}>
                 <Ionicons
                   name="camera-outline"
                   size={24}
@@ -548,8 +527,7 @@ const SocialScreen = () => {
               <TouchableOpacity
                 id="gallery"
                 style={styles.bottomModalOption}
-                onPress={() => handleImagePicker("gallery")}
-              >
+                onPress={() => handleImagePicker('gallery')}>
                 <Ionicons
                   name="file-image-outline"
                   size={24}
@@ -562,10 +540,9 @@ const SocialScreen = () => {
                 id="cancel"
                 style={[
                   styles.bottomModalOption,
-                  { justifyContent: "center", marginTop: 10 },
+                  {justifyContent: 'center', marginTop: 10},
                 ]}
-                onPress={() => setImagePickerModalVisible(false)}
-              >
+                onPress={() => setImagePickerModalVisible(false)}>
                 <Ionicons
                   name="close-circle-outline"
                   size={24}
@@ -573,11 +550,7 @@ const SocialScreen = () => {
                   style={styles.iconStyle}
                 />
                 <Text
-                  style={[
-                    styles.bottomModalOptionText,
-                    { color: Colors.Error },
-                  ]}
-                >
+                  style={[styles.bottomModalOptionText, {color: Colors.Error}]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -596,21 +569,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: Colors.CardBorder,
   },
   headerUsername: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.TextPrimary,
   },
   profileSection: {
-    flexDirection: "column",
-    alignItems: "center",
+    flexDirection: 'column',
+    alignItems: 'center',
     padding: 20,
   },
   profileImage: {
@@ -620,7 +593,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   profileStats: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 10,
   },
   gymPointsButton: {
@@ -632,23 +605,23 @@ const styles = StyleSheet.create({
   gymPointsText: {
     color: Colors.Secondary,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   bioSection: {
     paddingHorizontal: 20,
     marginBottom: 15,
-    alignItems: "center",
+    alignItems: 'center',
   },
   fullName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.TextPrimary,
   },
   bio: {
     fontSize: 14,
     color: Colors.TextSecondary,
     marginTop: 5,
-    textAlign: "center",
+    textAlign: 'center',
   },
   editProfileButton: {
     marginHorizontal: 20,
@@ -656,16 +629,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: Colors.CardBorder,
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: Colors.CardBackground,
   },
   editProfileText: {
     color: Colors.TextPrimary,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   postGridHeader: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     borderTopWidth: 1,
     borderTopColor: Colors.CardBorder,
     marginTop: 15,
@@ -673,10 +646,10 @@ const styles = StyleSheet.create({
   gridToggle: {
     paddingVertical: 10,
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   post: {
-    width: "33.33%",
+    width: '33.33%',
     aspectRatio: 1,
     padding: 1,
   },
@@ -684,15 +657,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   floatingButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 20,
     bottom: 60,
     backgroundColor: Colors.Blue,
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 5,
   },
   modalContent: {
@@ -700,21 +673,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.Primary,
   },
   modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: Colors.CardBorder,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.TextPrimary,
   },
   modalShareText: {
     color: Colors.Blue,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   captionInput: {
     padding: 15,
@@ -729,8 +702,8 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   uploadedImage: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     borderRadius: 10,
   },
   uploadText: {
@@ -738,33 +711,33 @@ const styles = StyleSheet.create({
   },
   fullScreenModal: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.9)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   fullScreenImage: {
-    width: "100%",
-    height: "80%",
-    resizeMode: "contain",
+    width: '100%',
+    height: '80%',
+    resizeMode: 'contain',
   },
   fullScreenCaption: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 20,
     left: 0,
     right: 0,
     padding: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   fullScreenCaptionText: {
     color: Colors.TextPrimary,
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   profileModalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   largeProfileImage: {
     width: 300,
@@ -779,7 +752,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   changeProfilePicture: {
-    alignItems: "center",
+    alignItems: 'center',
     marginBottom: 20,
   },
   editProfileImage: {
@@ -808,12 +781,12 @@ const styles = StyleSheet.create({
   },
   bioInput: {
     height: 100,
-    textAlignVertical: "top",
+    textAlignVertical: 'top',
   },
   bottomModalContainer: {
     flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   bottomModal: {
     backgroundColor: Colors.CardBackground,
@@ -823,13 +796,13 @@ const styles = StyleSheet.create({
   },
   bottomModalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.TextPrimary,
     marginBottom: 15,
   },
   bottomModalOption: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 10,
   },
   iconStyle: {
