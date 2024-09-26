@@ -23,9 +23,10 @@ import {UserContext} from '../../../context/UserContext';
 import {Colors} from '../../../constants/Colors';
 import {useNavigation} from '@react-navigation/native';
 import Loader from '../../../components/shared/Loader';
+import Skeleton from 'react-loading-skeleton';
 
 const SocialScreen = () => {
-  const {user, setSocialUser,socialUser} = useContext(UserContext);
+  const {user, setSocialUser, socialUser} = useContext(UserContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
@@ -39,6 +40,7 @@ const SocialScreen = () => {
   const [imagePickerModalVisible, setImagePickerModalVisible] = useState(false);
   const [profileVisibility, setProfileVisibility] = useState(false);
   const [refreshing, setRefreshing] = useState(false); // State to manage refresh
+  const [loadingPostMedia, setLoadingPostMedia] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -103,6 +105,7 @@ const SocialScreen = () => {
   };
 
   const handleFileUpload = async fileUri => {
+    setImageUpload(true);
     const formData = new FormData();
     formData.append('file', {
       uri: fileUri,
@@ -111,7 +114,7 @@ const SocialScreen = () => {
     });
     try {
       const res = await axios.post(
-        `${local}/api/fasst/services/upload`,
+        `${Server}/api/fasst/services/upload`,
         formData,
         {
           headers: {
@@ -176,7 +179,7 @@ const SocialScreen = () => {
 
   const handlePost = async () => {
     setLoading(true);
-    const url = await handleFileUpload(selectedImage)
+    const url = await handleFileUpload(selectedImage);
     axios
       .post(`${Server}/api/social/interactions/post`, {
         socialUserId: userData._id,
@@ -247,17 +250,22 @@ const SocialScreen = () => {
           <FlatList
             style={{marginBottom: 90}}
             data={posts}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                key={item._id}
-                style={styles.post}
-                onPress={() => handlePostPress(item)}>
-                <Image
-                  source={{uri: item.media.image}}
-                  style={styles.postImage}
-                />
-              </TouchableOpacity>
-            )}
+            renderItem={({item}) => {
+              return (
+                <>
+                  <TouchableOpacity
+                    key={item._id}
+                    style={styles.post}
+                    onPress={() => handlePostPress(item)}>
+                    <Image
+                      source={{uri: item.media.image}}
+                      style={styles.postImage}
+                      onLoad={() => setLoadingPostMedia(true)}
+                    />
+                  </TouchableOpacity>
+                </>
+              );
+            }}
             numColumns={3}
             scrollEnabled={false}
           />
@@ -410,11 +418,11 @@ const SocialScreen = () => {
               <TouchableOpacity
                 disabled={imageUpload}
                 onPress={handleEditProfile}>
-                 <Ionicons
-                  name="checkmark"
+                <Ionicons
+                  name="account-check-outline"
                   size={24}
                   color={imageUpload ? Colors.CardBackground : Colors.Blue}
-                /> 
+                />
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.editProfileForm}>

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,16 @@ import {
   Modal,
   RefreshControl,
   ScrollView,
-} from "react-native";
-import { UserContext } from "../../../context/UserContext";
-import Ionicons from "react-native-vector-icons/Ionicons"; // Import Ionicons
-import { Colors } from "../../../constants/Colors"; // Import Colors
-import axios from "axios";
-import { Server } from "../../../constants/Configs";
-import { categorizeMeetups } from "../../../utils/MeetupsSorting";
+} from 'react-native';
+import {UserContext} from '../../../context/UserContext';
+import Ionicons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {Colors} from '../../../constants/Colors'; // Import Colors
+import axios from 'axios';
+import {Server} from '../../../constants/Configs';
+import {categorizeMeetups} from '../../../utils/MeetupsSorting';
 
 const Meetups = () => {
-  const { user } = useContext(UserContext);
+  const {user} = useContext(UserContext);
   const [meetupRequests, setMeetupRequests] = useState([]);
   const [upcomingMeetups, setUpcomingMeetups] = useState([]);
   const [pastMeetups, setPastMeetups] = useState([]);
@@ -33,13 +33,13 @@ const Meetups = () => {
   const fetchMeetups = () => {
     axios
       .get(`${Server}/api/social/interactions/meetups/${user.SOCIAL_USER}/`)
-      .then((res) => {
+      .then(res => {
         const sortedMeetups = categorizeMeetups(res.data);
         setMeetupRequests(sortedMeetups.pendingMeetups);
         setUpcomingMeetups(sortedMeetups.acceptedMeetups);
         setPastMeetups(sortedMeetups.completedMeetups);
       })
-      .catch((err) => console.error(err))
+      .catch(err => console.error(err))
       .finally(() => setRefreshing(false)); // End refreshing state
   };
 
@@ -48,29 +48,29 @@ const Meetups = () => {
     fetchMeetups(); // Fetch latest meetups when refresh is triggered
   };
 
-  const renderMeetupItem = ({ item, isRequest }) => (
+  const renderMeetupItem = ({item, isRequest}) => (
     <TouchableOpacity onPress={() => handleMeetupClick(item, isRequest)}>
       <View style={styles.meetupCard}>
         <View style={styles.meetupCardHeader}>
           <Ionicons
             name={
-              item.status === "pending"
-                ? "hourglass-outline"
-                : item.status === "accepted"
-                ? "checkmark-circle-outline"
-                : item.status === "declined"
-                ? "close-circle-outline"
-                : "checkmark-done-outline"
+              item.status === 'pending'
+                ? 'hourglass'
+                : item.status === 'accepted'
+                ? 'check-circle-outline'
+                : item.status === 'declined'
+                ? 'close-circle-outline'
+                : 'check-circle'
             }
             size={20}
             color={Colors.TintColorDark}
             style={styles.meetupStatusIcon}
           />
-          <Text style={styles.meetupTitle}>{"Meetup at " + item.location}</Text>
+          <Text style={styles.meetupTitle}>{'Meetup at ' + item.location}</Text>
         </View>
         <Text style={styles.meetupDate}>{item.otherInformation}</Text>
         <Text style={styles.meetupDate}>
-          {new Date(item.date).toLocaleDateString()} at{" "}
+          {new Date(item.date).toLocaleDateString()} at{' '}
           {new Date(item.date).toLocaleTimeString()}
         </Text>
         <Text style={styles.meetupLocation}>{item.location}</Text>
@@ -88,25 +88,25 @@ const Meetups = () => {
   const handleAcceptMeetup = () => {
     axios
       .put(
-        `${Server}/api/social/meetups/status/${selectedMeetup._id}/accepted/`
+        `${Server}/api/social/meetups/status/${selectedMeetup._id}/accepted/`,
       )
       .then(() => {
         setMeetupStatus(!meetupStatus);
         setModalVisible(false);
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   };
 
   const handleRejectMeetup = () => {
     axios
       .put(
-        `${Server}/api/social/meetups/status/${selectedMeetup._id}/declined/`
+        `${Server}/api/social/meetups/status/${selectedMeetup._id}/declined/`,
       )
       .then(() => {
         setMeetupStatus(!meetupStatus);
         setModalVisible(false);
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   };
 
   return (
@@ -119,12 +119,11 @@ const Meetups = () => {
             colors={[Colors.TintColorDark]}
             tintColor={Colors.TintColorDark}
           />
-        }
-      >
+        }>
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons
-              name="notifications-outline"
+              name="bell-badge-outline"
               size={20}
               color={Colors.TintColorDark}
             />
@@ -132,10 +131,8 @@ const Meetups = () => {
           </View>
           <FlatList
             data={meetupRequests}
-            renderItem={({ item }) =>
-              renderMeetupItem({ item, isRequest: true })
-            }
-            keyExtractor={(item) => item._id.$oid}
+            renderItem={({item}) => renderMeetupItem({item, isRequest: true})}
+            keyExtractor={item => item._id.$oid}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No Meetup Requests</Text>
             }
@@ -154,10 +151,8 @@ const Meetups = () => {
           </View>
           <FlatList
             data={upcomingMeetups}
-            renderItem={({ item }) =>
-              renderMeetupItem({ item, isRequest: false })
-            }
-            keyExtractor={(item) => item._id.$oid}
+            renderItem={({item}) => renderMeetupItem({item, isRequest: false})}
+            keyExtractor={item => item._id.$oid}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No Upcoming Meetups</Text>
             }
@@ -168,7 +163,7 @@ const Meetups = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Ionicons
-              name="time-outline"
+              name="clock-outline"
               size={20}
               color={Colors.TintColorDark}
             />
@@ -176,10 +171,8 @@ const Meetups = () => {
           </View>
           <FlatList
             data={pastMeetups}
-            renderItem={({ item }) =>
-              renderMeetupItem({ item, isRequest: false })
-            }
-            keyExtractor={(item) => item._id}
+            renderItem={({item}) => renderMeetupItem({item, isRequest: false})}
+            keyExtractor={item => item._id}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No Past Meetups</Text>
             }
@@ -194,8 +187,7 @@ const Meetups = () => {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
+          onRequestClose={() => setModalVisible(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Meetup Details</Text>
@@ -203,12 +195,12 @@ const Meetups = () => {
                 Location: {selectedMeetup.location}
               </Text>
               <Text style={styles.modalText}>
-                Date:{" "}
-                {new Date(selectedMeetup.date).toLocaleString().split(",")[0]}
+                Date:{' '}
+                {new Date(selectedMeetup.date).toLocaleString().split(',')[0]}
               </Text>
               <Text style={styles.modalText}>
-                Time:{" "}
-                {new Date(selectedMeetup.date).toLocaleString().split(",")[1]}
+                Time:{' '}
+                {new Date(selectedMeetup.date).toLocaleString().split(',')[1]}
               </Text>
               <Text style={styles.modalText}>
                 Info: {selectedMeetup.otherInformation}
@@ -216,10 +208,9 @@ const Meetups = () => {
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={styles.acceptButton}
-                  onPress={handleAcceptMeetup}
-                >
+                  onPress={handleAcceptMeetup}>
                   <Ionicons
-                    name="checkmark-circle-outline"
+                    name="check-circle-outline"
                     size={20}
                     color={Colors.Secondary}
                   />
@@ -227,8 +218,7 @@ const Meetups = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.rejectButton}
-                  onPress={handleRejectMeetup}
-                >
+                  onPress={handleRejectMeetup}>
                   <Ionicons
                     name="close-circle-outline"
                     size={20}
@@ -255,14 +245,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
   },
   sectionTitle: {
     color: Colors.TextPrimary,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 10,
   },
   meetupCard: {
@@ -274,13 +264,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   meetupCardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   meetupTitle: {
     color: Colors.TextPrimary,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 10,
   },
   meetupStatusIcon: {
@@ -298,27 +288,27 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: Colors.TextSecondary,
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 10,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: "80%",
+    width: '80%',
     backgroundColor: Colors.CardBackground,
     padding: 20,
     borderRadius: 10,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.TextPrimary,
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: 'center',
   },
   modalText: {
     color: Colors.TextPrimary,
@@ -326,28 +316,28 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 20,
   },
   acceptButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.Success,
     padding: 10,
     borderRadius: 5,
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     marginRight: 5,
   },
   rejectButton: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.Error,
     padding: 10,
     borderRadius: 5,
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     marginLeft: 5,
   },
   buttonText: {
