@@ -24,7 +24,9 @@ import AgeModal from '../../../components/private/home/AgeModal';
 import HydrationModal from '../../../components/private/home/HydrationModal';
 import StepsModal from '../../../components/private/home/StepsModal';
 import WorkoutModal from '../../../components/private/home/WorkoutModal';
-import Pedometer from 'react-native-pedometer';
+import { accelerometer } from 'react-native-sensors';
+import { Subscription } from 'rxjs';
+
 import {Server} from '../../../constants/Configs';
 import {Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
@@ -53,19 +55,39 @@ const HomeScreen = () => {
   const [currentSteps, setCurrentSteps] = useState(0);
   const [pedometerSubscription, setPedometerSubscription] = useState(null);
   const [olderStepsCount, setOlderStepsCount] = useState(0);
+  const [stepCount, setStepCount] = useState(0);
+  const [subscription, setSubscription] = useState(null);
+
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
     fetchInsights();
   }, []);
-
   useEffect(() => {
-    if (isTrackingSteps) {
-      startStepCounting();
-    } else if (pedometerSubscription) {
-      stopStepCounting();
-    }
-  }, [isTrackingSteps]);
+    const stepThreshold = 1.2; // Adjust this threshold based on your needs
+    let steps = 0;
+
+    const newSubscription = accelerometer.subscribe(({ x, y, z }) => {
+      const totalForce = Math.sqrt(x * x + y * y + z * z);
+      if (totalForce > stepThreshold) {
+        steps++;
+        setStepCount(steps);
+      }
+    });
+
+    setSubscription(newSubscription);
+
+    return () => {
+      newSubscription.unsubscribe();
+    };
+  }, []);
+  // useEffect(() => {
+  //   if (isTrackingSteps) {
+  //     startStepCounting();
+  //   } else if (pedometerSubscription) {
+  //     stopStepCounting();
+  //   }
+  // }, [isTrackingSteps]);
 
   const fetchInsights = async () => {
     try {
@@ -99,63 +121,63 @@ const HomeScreen = () => {
     }
   };
 
-  const startStepCounting = async () => {
-    // Check if the Pedometer is available
-    const isPedometerAvailable = await Pedometer.isAvailableAsync();
-    if (!isPedometerAvailable) {
-      Alert.alert('Error', 'Pedometer not available on this device.');
-      return;
-    }
+  // const startStepCounting = async () => {
+  //   // Check if the Pedometer is available
+  //   const isPedometerAvailable = await Pedometer.isAvailableAsync();
+  //   if (!isPedometerAvailable) {
+  //     Alert.alert('Error', 'Pedometer not available on this device.');
+  //     return;
+  //   }
 
-    // Request permission on Android
-    if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
-        {
-          title: 'Activity Recognition Permission',
-          message: 'This app needs access to your activity to track steps.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
+  //   // Request permission on Android
+  //   if (Platform.OS === 'android') {
+  //     const granted = await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
+  //       {
+  //         title: 'Activity Recognition Permission',
+  //         message: 'This app needs access to your activity to track steps.',
+  //         buttonNeutral: 'Ask Me Later',
+  //         buttonNegative: 'Cancel',
+  //         buttonPositive: 'OK',
+  //       },
+  //     );
 
-      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-        Alert.alert(
-          'Permission required',
-          'Activity recognition permission is required to track steps.',
-        );
-        return;
-      }
-    }
+  //     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+  //       Alert.alert(
+  //         'Permission required',
+  //         'Activity recognition permission is required to track steps.',
+  //       );
+  //       return;
+  //     }
+  //   }
 
-    // Start watching step count
-    const subscription = Pedometer.watchStepCount(result => {
-      setCurrentSteps(result.steps);
-    });
+  //   // Start watching step count
+  //   const subscription = Pedometer.watchStepCount(result => {
+  //     setCurrentSteps(result.steps);
+  //   });
 
-    setPedometerSubscription(subscription);
-  };
+  //   setPedometerSubscription(subscription);
+  // };
 
-  const stopStepCounting = () => {
-    const stopStepCounting = () => {
-      if (pedometerSubscription) {
-        pedometerSubscription.remove();
-        setPedometerSubscription(null);
+  // const stopStepCounting = () => {
+  //   const stopStepCounting = () => {
+  //     if (pedometerSubscription) {
+  //       pedometerSubscription.remove();
+  //       setPedometerSubscription(null);
 
-        axios
-          .put(
-            `${Server}/api/insights/steps/update/${currentSteps}/${user._id}`,
-          )
-          .then(res => {
-            setCurrentSteps(res.data.steps);
-          })
-          .catch(error => {
-            console.error('Error updating steps:', error);
-          });
-      }
-    };
-  };
+  //       axios
+  //         .put(
+  //           `${Server}/api/insights/steps/update/${currentSteps}/${user._id}`,
+  //         )
+  //         .then(res => {
+  //           setCurrentSteps(res.data.steps);
+  //         })
+  //         .catch(error => {
+  //           console.error('Error updating steps:', error);
+  //         });
+  //     }
+  //   };
+  // };
 
   const toggleStepTracking = () => {
     setIsTrackingSteps(prev => !prev);
