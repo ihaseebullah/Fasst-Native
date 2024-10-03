@@ -24,12 +24,13 @@ import AgeModal from '../../../components/private/home/AgeModal';
 import HydrationModal from '../../../components/private/home/HydrationModal';
 import StepsModal from '../../../components/private/home/StepsModal';
 import WorkoutModal from '../../../components/private/home/WorkoutModal';
-import { accelerometer } from 'react-native-sensors';
-import { Subscription } from 'rxjs';
+
+import {Subscription} from 'rxjs';
 
 import {Server} from '../../../constants/Configs';
 import {Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {startCounter, stopCounter} from 'react-native-accurate-step-counter';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -57,37 +58,27 @@ const HomeScreen = () => {
   const [olderStepsCount, setOlderStepsCount] = useState(0);
   const [stepCount, setStepCount] = useState(0);
   const [subscription, setSubscription] = useState(null);
-
+  const [steps, setSteps] = useState(0);
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
     fetchInsights();
   }, []);
+
+  const config = {
+    default_threshold: 15.0,
+    default_delay: 150000000,
+    cheatInterval: 3000,
+    onStepCountChange: stepCount => {
+      setCurrentSteps(stepCount);
+    },
+    onCheat: () => {
+      console.log('User is Cheating');
+    },
+  };
   useEffect(() => {
-    const stepThreshold = 1.2; // Adjust this threshold based on your needs
-    let steps = 0;
-
-    const newSubscription = accelerometer.subscribe(({ x, y, z }) => {
-      const totalForce = Math.sqrt(x * x + y * y + z * z);
-      if (totalForce > stepThreshold) {
-        steps++;
-        setStepCount(steps);
-      }
-    });
-
-    setSubscription(newSubscription);
-
-    return () => {
-      newSubscription.unsubscribe();
-    };
-  }, []);
-  // useEffect(() => {
-  //   if (isTrackingSteps) {
-  //     startStepCounting();
-  //   } else if (pedometerSubscription) {
-  //     stopStepCounting();
-  //   }
-  // }, [isTrackingSteps]);
+    console.log(steps);
+  }, [steps]);
 
   const fetchInsights = async () => {
     try {
@@ -121,66 +112,30 @@ const HomeScreen = () => {
     }
   };
 
-  // const startStepCounting = async () => {
-  //   // Check if the Pedometer is available
-  //   const isPedometerAvailable = await Pedometer.isAvailableAsync();
-  //   if (!isPedometerAvailable) {
-  //     Alert.alert('Error', 'Pedometer not available on this device.');
-  //     return;
-  //   }
+  const startStepCounting = async () => {
+    startCounter(config);
+  };
 
-  //   // Request permission on Android
-  //   if (Platform.OS === 'android') {
-  //     const granted = await PermissionsAndroid.request(
-  //       PermissionsAndroid.PERMISSIONS.ACTIVITY_RECOGNITION,
-  //       {
-  //         title: 'Activity Recognition Permission',
-  //         message: 'This app needs access to your activity to track steps.',
-  //         buttonNeutral: 'Ask Me Later',
-  //         buttonNegative: 'Cancel',
-  //         buttonPositive: 'OK',
-  //       },
-  //     );
-
-  //     if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-  //       Alert.alert(
-  //         'Permission required',
-  //         'Activity recognition permission is required to track steps.',
-  //       );
-  //       return;
-  //     }
-  //   }
-
-  //   // Start watching step count
-  //   const subscription = Pedometer.watchStepCount(result => {
-  //     setCurrentSteps(result.steps);
-  //   });
-
-  //   setPedometerSubscription(subscription);
-  // };
-
-  // const stopStepCounting = () => {
-  //   const stopStepCounting = () => {
-  //     if (pedometerSubscription) {
-  //       pedometerSubscription.remove();
-  //       setPedometerSubscription(null);
-
-  //       axios
-  //         .put(
-  //           `${Server}/api/insights/steps/update/${currentSteps}/${user._id}`,
-  //         )
-  //         .then(res => {
-  //           setCurrentSteps(res.data.steps);
-  //         })
-  //         .catch(error => {
-  //           console.error('Error updating steps:', error);
-  //         });
-  //     }
-  //   };
-  // };
+  const stopStepCounting = () => {
+    stopCounter();
+    axios
+      .put(`${Server}/api/insights/steps/update/${currentSteps}/${user._id}`)
+      .then(res => {
+        setCurrentSteps(res.data.steps);
+      })
+      .catch(error => {
+        console.error('Error updating steps:', error);
+      });
+  };
 
   const toggleStepTracking = () => {
-    setIsTrackingSteps(prev => !prev);
+    if (isTrackingSteps) {
+      setIsTrackingSteps(false);
+      stopStepCounting();
+    } else {
+      startStepCounting();
+      setIsTrackingSteps(true);
+    }
   };
 
   const onRefresh = () => {
@@ -222,11 +177,7 @@ const HomeScreen = () => {
               socialUser: socialUser,
             });
           }}>
-          <Icon
-            name="notifications"
-            size={30}
-            color={Colors.TextPrimary}
-          />
+          <Icon name="notifications" size={30} color={Colors.TextPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -302,7 +253,11 @@ const HomeScreen = () => {
                 : {backgroundColor: Colors.CardBackground},
             ]}
             onPress={() => setStepsModalVisible(true)}>
-            <Icon name="directions-run" size={30} color={Colors.TintColorLight} />
+            <Icon
+              name="directions-run"
+              size={30}
+              color={Colors.TintColorLight}
+            />
             <Text style={styles.metricValue}>
               {currentSteps + olderStepsCount}
             </Text>
@@ -332,12 +287,12 @@ const HomeScreen = () => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Icon
-                color={Colors.Secondary}
-                name="exit-to-app"
-                size={20}
-                style={{marginLeft: 5}}
-              />
+            <Icon
+              color={Colors.Secondary}
+              name="exit-to-app"
+              size={20}
+              style={{marginLeft: 5}}
+            />
             <Text
               style={{
                 textAlign: 'center',

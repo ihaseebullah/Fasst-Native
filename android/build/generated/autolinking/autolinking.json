@@ -80,6 +80,25 @@
         }
       }
     },
+    "react-native-accurate-step-counter": {
+      "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-accurate-step-counter",
+      "name": "react-native-accurate-step-counter",
+      "platforms": {
+        "ios": null,
+        "android": {
+          "sourceDir": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-accurate-step-counter\\android",
+          "packageImportPath": "import com.synclovis.RNWalkCounterPackage;",
+          "packageInstance": "new RNWalkCounterPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/CEVEN/fasst-native/fasst/node_modules/react-native-accurate-step-counter/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-geolocation-service": {
       "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-geolocation-service",
       "name": "react-native-geolocation-service",
@@ -303,30 +322,6 @@
             "RNSModalScreenComponentDescriptor"
           ],
           "cmakeListsPath": "D:/CEVEN/fasst-native/fasst/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
-          "cxxModuleCMakeListsModuleName": null,
-          "cxxModuleCMakeListsPath": null,
-          "cxxModuleHeaderName": null,
-          "isPureCxxDependency": false
-        }
-      }
-    },
-    "react-native-sensors": {
-      "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-sensors",
-      "name": "react-native-sensors",
-      "platforms": {
-        "ios": {
-          "podspecPath": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-sensors\\RNSensors.podspec",
-          "version": "7.3.6",
-          "configurations": [],
-          "scriptPhases": []
-        },
-        "android": {
-          "sourceDir": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-sensors\\android",
-          "packageImportPath": "import com.sensors.RNSensorsPackage;",
-          "packageInstance": "new RNSensorsPackage()",
-          "buildTypes": [],
-          "componentDescriptors": [],
-          "cmakeListsPath": "D:/CEVEN/fasst-native/fasst/node_modules/react-native-sensors/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
