@@ -23,7 +23,6 @@ import {
 import CategoryButton from '../../../components/private/workouts/CategoryButton';
 import ExerciseModal from '../../../components/private/workouts/ExerciseModal';
 import Ionicons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Pedometer from 'react-native-pedometer'; // Import Pedometer for step tracking
 import Svg, {Path} from 'react-native-svg'; // Import SVG for icons
 import LottieView from 'lottie-react-native';
 import Header from '../../../components/private/workouts/Header';
@@ -33,6 +32,7 @@ import {WorkoutCategorySelector} from '../../../components/private/workouts/Work
 import {ChallengeModal} from '../../../components/private/workouts/ChallengeModal';
 import {DaySelectorModal} from '../../../components/private/workouts/DaySelector';
 import {useNavigation} from '@react-navigation/native';
+import {startCounter, stopCounter} from 'react-native-accurate-step-counter';
 
 const Workouts = () => {
   const {user, setUser} = useContext(UserContext);
@@ -75,42 +75,30 @@ const Workouts = () => {
   // State for step tracking
   const [isTrackingSteps, setIsTrackingSteps] = useState(false);
   const [currentSteps, setCurrentSteps] = useState(0);
-  const [pedometerSubscription, setPedometerSubscription] = useState(null);
-
+  const [challenge, setOngoingChallenge] = useState(null);
   const RECOMMENDED_CACHE_KEY = `recommended_${user._id}`;
   const TODAY_EXERCISES_CACHE_KEY = `today_exercises_${user._id}`;
-
+  const config = {
+    default_threshold: 15.0,
+    default_delay: 150000000,
+    cheatInterval: 3000,
+    onStepCountChange: async stepCount => {
+      setCurrentSteps(stepCount);
+    },
+    onCheat: () => {
+      console.log('User is Cheating');
+    },
+  };
   useEffect(() => {
     fetchTodaysExercises();
   }, [posted]);
   useEffect(() => {
     initalLoad();
   }, []);
-  const startStepCounting = async challenge => {
-    const isPedometerAvailable = await Pedometer.isAvailableAsync();
-    if (!isPedometerAvailable) {
-      console.log('Pedometer not available.');
-      ToastAndroid.show('Pedometer not available', ToastAndroid.SHORT);
-      return;
-    }
-
-    const {status} = await Pedometer.getPermissionsAsync();
-    if (status !== 'granted') {
-      const permissionResult = await Pedometer.requestPermissionsAsync();
-      if (permissionResult.status !== 'granted') {
-        ToastAndroid.show(
-          'Permission is required to track steps.',
-          ToastAndroid.SHORT,
-        );
-        return;
-      }
-    }
-
-    const subscription = Pedometer.watchStepCount(async result => {
-      console.log(challenge);
-      setCurrentSteps(result.steps);
+  useEffect(() => {
+    async function didIReached() {
       // Check if user has reached the required steps for the challenge
-      if (challenge && result.steps >= challenge.steps) {
+      if (challenge && currentSteps >= challenge.steps) {
         try {
           await axios.put(
             `${Server}/api/challenges/completion/${challenge._id}/${user._id}`,
@@ -135,16 +123,17 @@ const Workouts = () => {
           stopStepCounting();
         } // Automatically mark the challenge as completed
       }
-    });
-
-    setPedometerSubscription(subscription);
+    }
+    didIReached();
+  }, [currentSteps]);
+  const startStepCounting = async challenge => {
+    setOngoingChallenge(challenge);
+    startCounter(config);
   };
 
   const stopStepCounting = () => {
-    if (pedometerSubscription) {
-      pedometerSubscription.remove();
-      setPedometerSubscription(null);
-    }
+    stopStepCounting();
+    setOngoingChallenge(null);
   };
 
   const toggleStepTracking = challenge => {
@@ -436,7 +425,7 @@ const Workouts = () => {
   return (
     <View style={{flex: 1, backgroundColor: Colors.Primary}}>
       <FlatList
-      showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         style={{backgroundColor: Colors.Primary, padding: 10}}
         ListHeaderComponent={
           <View>
