@@ -45,7 +45,6 @@ const SocialScreen = () => {
 
   useEffect(() => {
     fetchUserData();
-    requestPermissions();
   }, []);
 
   useEffect(() => {
@@ -133,22 +132,8 @@ const SocialScreen = () => {
     }
   };
 
-  const requestPermissions = async () => {
-    const {status: cameraStatus} =
-      await ImagePicker.requestCameraPermissionsAsync();
-    const {status: mediaLibraryStatus} =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (cameraStatus !== 'granted' || mediaLibraryStatus !== 'granted') {
-      alert('Permission to access camera and media library is required!');
-      return false;
-    }
-    return true;
-  };
 
   const handleImagePicker = async option => {
-    // const hasPermissions = await requestPermissions();
-    // if (!hasPermissions) return;
     let result;
 
     if (option === 'camera') {

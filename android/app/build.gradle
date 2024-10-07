@@ -106,7 +106,24 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
+
+// Ensure tasks depend on each other correctly
+tasks.whenTaskAdded { task ->
+    if (task.name == 'lint') {
+        task.dependsOn 'copyReactNativeVectorIconFonts'
+    }
+    if (task.name == 'generateDebugLintReportModel') {
+        task.dependsOn 'copyReactNativeVectorIconFonts'
+    }
+    if (task.name == 'lintAnalyzeDebug') {
+        task.dependsOn 'copyReactNativeVectorIconFonts'
+    }
+}
+
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
@@ -119,7 +136,6 @@ dependencies {
     }
 }
 
-
 project.ext.vectoricons = [
-    iconFontNames: [ 'AntDesign.ttf', 'Entypo.ttf', 'EvilIcons.ttf', 'FontAwesome.ttf', 'FontAwesome5_Brands.ttf', 'FontAwesome5_Regular.ttf', 'FontAwesome5_Solid.ttf', 'Foundation.ttf', 'IcoMoon.ttf', 'MaterialIcons.ttf', 'MaterialCommunityIcons.ttf', 'Octicons.ttf', 'Zocial.ttf' ] // Add other icons here
+    iconFontNames: ['AntDesign.ttf', 'Entypo.ttf', 'EvilIcons.ttf', 'FontAwesome.ttf', 'FontAwesome5_Brands.ttf', 'FontAwesome5_Regular.ttf', 'FontAwesome5_Solid.ttf', 'Foundation.ttf', 'IcoMoon.ttf', 'MaterialIcons.ttf', 'MaterialCommunityIcons.ttf', 'Octicons.ttf', 'Zocial.ttf'] // Add other icons here
 ]

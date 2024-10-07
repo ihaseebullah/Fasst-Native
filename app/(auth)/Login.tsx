@@ -1,4 +1,4 @@
-// @ts-nocheck
+//@ts-nocheck
 import {
   View,
   Text,
@@ -6,44 +6,48 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ToastAndroid,AsyncStorage
-} from "react-native";
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import { Colors } from "../../constants/Colors";
-import { Server } from "../../constants/Configs";
-import { UserContext } from "../../context/UserContext";
+  ToastAndroid,
+} from 'react-native';
+import React, {useContext, useEffect, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
+import {Colors} from '../../constants/Colors';
+import {Server} from '../../constants/Configs';
+import {UserContext} from '../../context/UserContext';
 
 const Login = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { setUser } = useContext(UserContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const {setUser} = useContext(UserContext);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         let res = await axios.get(`${Server}/root`);
+        //Needs to update this ....
         if (res.status === 200) {
-          navigation.navigate("App");
-          await AsyncStorage.setItem(
-            "App_Data",
-            JSON.stringify({ isLoggedIn: true, user: res.data })
-          );
-        } else {
-          let oldData = await AsyncStorage.getItem("App_Data");
-          oldData = JSON.parse(oldData);
-          await AsyncStorage.setItem(
-            "App_Data",
-            JSON.stringify({ ...oldData, isLoggedIn: false })
-          );
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'App'}],
+          });
+          // await AsyncStorage.setItem(
+          //   "App_Data",
+          //   JSON.stringify({ isLoggedIn: true, user: res.data })
+          // );
         }
+        //  else {
+        //   let oldData = await AsyncStorage.getItem("App_Data");
+        //   oldData = JSON.parse(oldData);
+        //   await AsyncStorage.setItem(
+        //     "App_Data",
+        //     JSON.stringify({ ...oldData, isLoggedIn: false })
+        //   );
+        // }
       } catch (error) {
-        console.error("Error checking login status:", error);
+        console.error('Error checking login status:', error);
       }
     };
-
     checkLoginStatus();
   }, [navigation]);
 
@@ -56,42 +60,42 @@ const Login = () => {
       });
 
       if (response.data.token) {
-        await AsyncStorage.setItem(
-          "App_Data",
-          JSON.stringify({
-            isLoggedIn: true,
-            accountExist: true,
-            user: response.data.user,
-            token: response.data.token,
-          })
-        );
+        // await AsyncStorage.setItem(
+        //   'App_Data',
+        //   JSON.stringify({
+        //     isLoggedIn: true,
+        //     accountExist: true,
+        //     user: response.data.user,
+        //     token: response.data.token,
+        //   }),
+        // );
         setUser(response.data.user);
         setLoading(false);
         if (!response.data.user.SOCIAL_USER) {
           navigation.reset({
             index: 0,
-            routes: [{ name: "Social_Info" }],
+            routes: [{name: 'Social_Info'}],
           });
         } else if (!response.data.user.HEALTH_MATRICS) {
           navigation.reset({
             index: 0,
-            routes: [{ name: "Health_Metrics" }],
+            routes: [{name: 'Health_Metrics'}],
           });
         } else if (!response.data.user.GOALS) {
           navigation.reset({
             index: 0,
-            routes: [{ name: "Goal_Screen" }],
+            routes: [{name: 'Goal_Screen'}],
           });
         } else {
           navigation.reset({
             index: 0,
-            routes: [{ name: "App" }],
+            routes: [{name: 'App'}],
           });
         }
       } else {
         ToastAndroid.show(
-          "Invalid response from the server",
-          ToastAndroid.SHORT
+          'Invalid response from the server',
+          ToastAndroid.SHORT,
         );
       }
     } catch (error) {
@@ -125,9 +129,8 @@ const Login = () => {
       />
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("Forgot_Password")}
-        style={styles.forgotPasswordContainer}
-      >
+        onPress={() => navigation.navigate('Forgot_Password')}
+        style={styles.forgotPasswordContainer}>
         <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
 
@@ -137,7 +140,7 @@ const Login = () => {
 
       <View style={styles.signupContainer}>
         <Text style={styles.signupText}>Don't have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
           <Text style={styles.signupLink}>Sign Up</Text>
         </TouchableOpacity>
       </View>
@@ -148,14 +151,14 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: Colors.Primary, // Dark background color
     paddingHorizontal: 30,
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     color: Colors.Secondary, // Light color for the title
     marginBottom: 10,
   },
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   input: {
-    width: "100%",
+    width: '100%',
     height: 50,
     backgroundColor: Colors.CardBackground, // Darker background for input fields
     borderRadius: 8,
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   forgotPasswordContainer: {
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginBottom: 20,
   },
   forgotPasswordText: {
@@ -185,23 +188,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loginButton: {
-    width: "100%",
+    width: '100%',
     height: 50,
     backgroundColor: Colors.Blue, // Light color for the button
     borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
   },
   loginButtonText: {
     color: Colors.Secondary, // Dark text color on light buttons
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   signupContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   signupText: {
     color: Colors.TextSecondary, // Secondary text color for less emphasis
@@ -210,7 +213,7 @@ const styles = StyleSheet.create({
   signupLink: {
     color: Colors.Blue, // Use blue for actionable text like sign-up links
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginLeft: 5,
   },
 });

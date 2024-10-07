@@ -151,6 +151,30 @@
         }
       }
     },
+    "react-native-get-location": {
+      "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-get-location",
+      "name": "react-native-get-location",
+      "platforms": {
+        "ios": {
+          "podspecPath": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-get-location\\ReactNativeGetLocation.podspec",
+          "version": "5.0.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-get-location\\android",
+          "packageImportPath": "import com.github.douglasjunior.reactNativeGetLocation.ReactNativeGetLocationPackage;",
+          "packageInstance": "new ReactNativeGetLocationPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "D:/CEVEN/fasst-native/fasst/node_modules/react-native-get-location/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-health": {
       "root": "D:\\CEVEN\\fasst-native\\fasst\\node_modules\\react-native-health",
       "name": "react-native-health",

@@ -40,7 +40,10 @@ export const checkUserLogin = async (navigation, setAppData, setUser) => {
         });
       } else {
         // At this point, HEALTH_METRICS is considered valid
-        navigation.navigate("App");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "App" }],
+        });
       }
     } else {
       navigation.navigate("Onboarding_Workouts");
