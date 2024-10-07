@@ -9,7 +9,6 @@
 <!-- Define ACCESS_COARSE_LOCATION if you will use enableHighAccuracy=false  -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-   <!-- You will only need to add this meta-data tag, but make sure it's a child of application -->
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
