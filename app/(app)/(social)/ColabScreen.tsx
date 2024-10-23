@@ -17,6 +17,7 @@ import GetLocation from 'react-native-get-location';
 
 const ColabScreen = () => {
   const [initialRegion, setInitialRegion] = useState(null);
+  const [mapError, setMapError] = useState(false); // New state to handle map errors
   const {user} = useContext(UserContext);
   const mapRef = useRef(null);
   const [userLocations, setUserLocations] = useState([]);
@@ -48,73 +49,21 @@ const ColabScreen = () => {
         timeout: 60000,
       })
         .then(location => {
-          setInitialRegion(location);
+          setInitialRegion({
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          });
         })
         .catch(error => {
           const {code, message} = error;
           console.warn(code, message);
+          setMapError(true); // Set map error if location fails
         });
     }
     getLocation();
   }, []);
-
-  // Request location permissions and get current location
-  // useEffect(() => {
-  //   const requestLocationPermission = async () => {
-  //     try {
-  //       if (Platform.OS === "ios") {
-  //         const authStatus = await Geolocation.requestAuthorization();
-  //         if (authStatus === "granted") {
-  //           getCurrentLocation();
-  //         } else {
-  //           console.log("Location permission denied");
-  //         }
-  //       } else {
-  //         const granted = await PermissionsAndroid.request(
-  //           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-  //         );
-  //         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //           getCurrentLocation();
-  //         } else {
-  //           console.log("Location permission denied");
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error requesting location permission:", error);
-  //     }
-  //   };
-
-  //   requestLocationPermission();
-
-  // }, []);
-
-  // Get current location
-  // const getCurrentLocation = async () => {
-  //   try {
-  //     Geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const { latitude, longitude } = position.coords;
-
-  //         const initialRegion = {
-  //           latitude,
-  //           longitude,
-  //           latitudeDelta: 0.0922,
-  //           longitudeDelta: 0.0421,
-  //         };
-
-  //         setInitialRegion(initialRegion);
-  //         updateUserLocation(initialRegion); // Update user location
-  //         fitMapToMarkers(latitude, longitude); // Fit map to user locations
-  //       },
-  //       (error) => {
-  //         console.error("Error getting location:", error);
-  //       },
-  //       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-  //     );
-  //   } catch (error) {
-  //     console.error("Error in getting location:", error);
-  //   }
-  // };
 
   // Update user location on the server
   const updateUserLocation = async location => {
@@ -147,14 +96,23 @@ const ColabScreen = () => {
 
   return (
     <View style={styles.container}>
-      {initialRegion ? (
+      {mapError ? (
+        <Text style={styles.errorText}>
+          There was an error loading the map. Please try again later.
+        </Text>
+      ) : initialRegion ? (
         <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={initialRegion}
           showsUserLocation={true}
-          followsUserLocation={true}>
+          followsUserLocation={true}
+          onMapReady={() => setMapError(false)} // Reset map error on success
+          onError={(e) => {
+            console.error('Map Error: ', e.nativeEvent.errorMessage);
+            setMapError(true); // Handle MapView errors
+          }}>
           {userLocations
             .filter(location => location.id !== user._id)
             .map(user => (
@@ -243,6 +201,11 @@ const styles = StyleSheet.create({
   infoText: {
     color: Colors.TextPrimary,
     fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

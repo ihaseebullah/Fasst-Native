@@ -17,9 +17,13 @@ const TopTab = () => {
         tabBarStyle: {backgroundColor: Colors.Primary},
         tabBarIndicatorStyle: {backgroundColor: Colors.Blue},
       }}>
-      <TabBar.Screen name="Profile" component={SocialScreen} />
-      <TabBar.Screen name="Colab" component={ColabScreen} />
-      <TabBar.Screen name="Meetups" component={Meetups} />
+      <TabBar.Screen
+        key={'profileTab'}
+        name="Profile"
+        component={SocialScreen}
+      />
+      <TabBar.Screen key={'colabTab'} name="Colab" component={ColabScreen} />
+      <TabBar.Screen key={'meetupsTab'} name="Meetups" component={Meetups} />
     </TabBar.Navigator>
   );
 };
