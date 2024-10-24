@@ -6,6 +6,7 @@ import {
   PermissionsAndroid,
   Platform,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import axios from 'axios';
@@ -17,13 +18,35 @@ import GetLocation from 'react-native-get-location';
 
 const ColabScreen = () => {
   const [initialRegion, setInitialRegion] = useState(null);
-  const [mapError, setMapError] = useState(false); // New state to handle map errors
+  const [mapError, setMapError] = useState(false);
+  const [loading, setLoading] = useState(true); 
   const {user} = useContext(UserContext);
   const mapRef = useRef(null);
   const [userLocations, setUserLocations] = useState([]);
   const navigation = useNavigation();
 
-  // Fetch user locations periodically
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'App needs access to your location to show the map.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; 
+  };
+
   useEffect(() => {
     const fetchUserLocations = async () => {
       if (user && user.SOCIAL_USER) {
@@ -31,6 +54,7 @@ const ColabScreen = () => {
           const res = await axios.get(
             `${Server}/api/social/interactions/get/location/${user.SOCIAL_USER}/`,
           );
+          console.log('User locations:', res.data);
           setUserLocations(res.data);
         } catch (err) {
           console.error('Error fetching user locations:', err);
@@ -38,61 +62,76 @@ const ColabScreen = () => {
       }
     };
 
-    const intervalId = setInterval(fetchUserLocations, 10000); // Run every 10 seconds
-    return () => clearInterval(intervalId); // Cleanup
+    const intervalId = setInterval(fetchUserLocations, 10000); 
+    return () => clearInterval(intervalId);
   }, [user]);
 
   useEffect(() => {
-    async function getLocation() {
+    const getLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        setMapError(true);
+        return;
+      }
+
       await GetLocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 60000,
       })
         .then(location => {
+          console.log('Current location:', location);
           setInitialRegion({
             latitude: location.latitude,
             longitude: location.longitude,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           });
+          setLoading(false); 
         })
         .catch(error => {
-          const {code, message} = error;
-          console.warn(code, message);
-          setMapError(true); // Set map error if location fails
+          console.error('Error getting location:', error);
+          setMapError(true);
+          setLoading(false); 
         });
-    }
+    };
+
     getLocation();
   }, []);
 
-  // Update user location on the server
-  const updateUserLocation = async location => {
-    try {
-      await axios.put(
-        `${Server}/api/social/interactions/update/location/${user.SOCIAL_USER}/`,
-        {location},
-      );
-    } catch (err) {
-      console.error('Error updating location:', err);
-    }
+  const renderMarkers = () => {
+    return userLocations
+      .filter(location => location.id !== user._id) 
+      .map(user => (
+        <Marker
+          key={user.id}
+          coordinate={{
+            latitude: user.latitude,
+            longitude: user.longitude,
+          }}
+          onPress={() =>
+            navigation.navigate('User_Profile', {userId: user.id})
+          }>
+          <View style={styles.markerContainer}>
+            <View style={styles.markerImageContainer}>
+              <Image
+                source={{uri: user.profilePic}}
+                style={styles.markerImage}
+              />
+            </View>
+            <Text style={styles.markerText}>{user.name}</Text>
+          </View>
+        </Marker>
+      ));
   };
 
-  // Fit map to include user locations
-  const fitMapToMarkers = (latitude, longitude) => {
-    if (mapRef.current) {
-      const coordinates = [
-        {latitude, longitude},
-        ...userLocations.map(user => ({
-          latitude: user.latitude,
-          longitude: user.longitude,
-        })),
-      ];
-      mapRef.current.fitToCoordinates(coordinates, {
-        edgePadding: {top: 50, right: 50, bottom: 50, left: 50},
-        animated: true,
-      });
-    }
-  };
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.Blue} />
+        <Text style={styles.infoText}>Fetching location...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -108,34 +147,12 @@ const ColabScreen = () => {
           initialRegion={initialRegion}
           showsUserLocation={true}
           followsUserLocation={true}
-          onMapReady={() => setMapError(false)} // Reset map error on success
-          onError={(e) => {
+          onMapReady={() => setMapError(false)} 
+          onError={e => {
             console.error('Map Error: ', e.nativeEvent.errorMessage);
-            setMapError(true); // Handle MapView errors
+            setMapError(true);
           }}>
-          {userLocations
-            .filter(location => location.id !== user._id)
-            .map(user => (
-              <Marker
-                key={user.id}
-                coordinate={{
-                  latitude: user.latitude,
-                  longitude: user.longitude,
-                }}
-                onPress={() =>
-                  navigation.navigate('User_Profile', {userId: user.id})
-                }>
-                <View style={styles.markerContainer}>
-                  <View style={styles.markerImageContainer}>
-                    <Image
-                      source={{uri: user.profilePic}}
-                      style={styles.markerImage}
-                    />
-                  </View>
-                  <Text style={styles.markerText}>{user.name}</Text>
-                </View>
-              </Marker>
-            ))}
+          {renderMarkers()}
         </MapView>
       ) : (
         <Text style={styles.infoText}>Fetching location...</Text>
@@ -148,6 +165,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.Primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },

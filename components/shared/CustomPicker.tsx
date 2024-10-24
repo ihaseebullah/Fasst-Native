@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,14 @@ import {
   Modal,
   FlatList,
   StyleSheet,
-} from "react-native";
-import { Colors } from "../../constants/Colors";
-import Icon from "react-native-vector-icons/Ionicons";
+} from 'react-native';
+import {Colors} from '../../constants/Colors';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const CustomPicker = ({ label, selectedValue, onValueChange, items }) => {
+const CustomPicker = ({label, selectedValue, onValueChange, items}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleSelect = (value) => {
+  const handleSelect = value => {
     onValueChange(value);
     setModalVisible(false);
   };
@@ -23,38 +23,34 @@ const CustomPicker = ({ label, selectedValue, onValueChange, items }) => {
       <Text style={styles.label}>{label}</Text>
       <TouchableOpacity
         style={styles.picker}
-        onPress={() => setModalVisible(true)}
-      >
+        onPress={() => setModalVisible(true)}>
         <Text style={styles.selectedText}>
-          {items.find((item) => item.value === selectedValue)?.label}
+          {items.find(item => item.value === selectedValue)?.label}
         </Text>
-        <Icon name="chevron-down" size={24} color={Colors.Secondary} />
+        <Icon name="chevron-right" size={24} color={Colors.Secondary} />
       </TouchableOpacity>
 
       <Modal
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
-        animationType="slide"
-      >
+        animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <FlatList
               data={items}
-              keyExtractor={(item) => item.value.toString()}
-              renderItem={({ item }) => (
+              keyExtractor={item => item.value.toString()}
+              renderItem={({item}) => (
                 <TouchableOpacity
                   style={styles.item}
-                  onPress={() => handleSelect(item.value)}
-                >
+                  onPress={() => handleSelect(item.value)}>
                   <Text style={styles.itemText}>{item.label}</Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
+              onPress={() => setModalVisible(false)}>
               <Text style={styles.closeButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -66,7 +62,7 @@ const CustomPicker = ({ label, selectedValue, onValueChange, items }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     marginBottom: 15,
   },
   label: {
@@ -76,13 +72,13 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    width: "100%",
+    width: '100%',
     backgroundColor: Colors.CardBackground,
     borderRadius: 8,
     paddingHorizontal: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   selectedText: {
     color: Colors.TextPrimary,
@@ -90,12 +86,12 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
-    width: "80%",
+    width: '80%',
     backgroundColor: Colors.CardBackground,
     borderRadius: 10,
     padding: 20,
@@ -111,12 +107,12 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   closeButtonText: {
     color: Colors.Blue,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
 

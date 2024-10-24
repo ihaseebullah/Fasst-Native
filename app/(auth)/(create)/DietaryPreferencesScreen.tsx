@@ -50,7 +50,7 @@ export default function DietaryPreferencesScreen({ navigation }) {
     },
     {
       title: "Do you have any specific food allergies or intolerances?",
-      options: ["peanuts", "shellfish", "soy", "eggs"],
+      options: ["peanuts", "shellfish", "soy", "eggs","None"],
       key: "allergies",
       multiple: true,
     },

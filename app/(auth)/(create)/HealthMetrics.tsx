@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useContext, useState } from "react";
 import {
   View,
@@ -16,6 +17,7 @@ import { Server } from "../../../constants/Configs";
 import Loader from "../../../components/shared/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomPicker from "../../../components/shared/CustomPicker"; // Import CustomPicker
+import { useNavigation } from "@react-navigation/native";
 
 const activityLevels = [
   { label: "Sedentary (little to no exercise)", value: 1.2 },

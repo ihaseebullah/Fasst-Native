@@ -1,5 +1,5 @@
 import React, {useContext, useEffect} from 'react';
-import {View, StyleSheet, ActivityIndicator, Image, Text} from 'react-native';
+import {View, StyleSheet, Image, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Colors} from '../../constants/Colors';
 import {useNavigation} from '@react-navigation/native';
@@ -25,9 +25,8 @@ export const WelcomeScreen = () => {
           style={styles.logo}
           resizeMode="contain"
         />
-        {/* Adding the powered by Star Labs text */}
       </View>
-      <View style={{flex: 1, alignItems: 'baseline', justifyContent: 'center'}}>
+      <View style={styles.poweredByContainer}>
         <Text style={styles.poweredByText}>Powered by Star Labs</Text>
       </View>
     </View>
@@ -37,27 +36,27 @@ export const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.Primary, // Updated for dark theme
-    justifyContent: 'center',
+    backgroundColor: Colors.Primary,
+    justifyContent: 'space-between', // Changed to space-between
     alignItems: 'center',
   },
   imageContainer: {
+    marginTop: '40%',
     width: '100%',
     height: 350,
-    borderRadius: 15,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 200,
+    justifyContent: 'center', // Center logo vertically in the container
+    alignItems: 'center', // Center logo horizontally in the container
   },
   logo: {
-    width: '80%', // Adjust the width of the logo
-    height: '80%', // Adjust the height of the logo
+    width: '100%', // Adjust logo size as needed
+    height: '100%', // Adjust logo size as needed
+  },
+  poweredByContainer: {
+    paddingBottom: 20, // Adjust padding as needed
   },
   poweredByText: {
-    marginTop: 20, // Adjust the space between the logo and the text
-    fontSize: 12, // Font size for the text
-    color: Colors.TextSecondary, // Adjust the color as needed
+    fontSize: 12,
+    color: Colors.TextSecondary,
     textAlign: 'center',
   },
 });
